@@ -6,7 +6,37 @@ import base64
 import json
 import time  # at the top of your file
 from deep_translator import GoogleTranslator
+from datetime import datetime, timedelta
 
+import re
+
+# code for extracing medicines name duration and timing from the answer
+def extract_medicine_name(question):
+    # Looks for common medicine inquiry phrases
+    match = re.search(r"(?:take|use|about|for)\s+([A-Za-z0-9\-]+)", question, re.IGNORECASE)
+    return match.group(1) if match else "Medication"
+
+def extract_duration_days(answer):
+    match = re.search(r"for (\d+) days?", answer)
+    return int(match.group(1)) if match else 7
+
+def extract_dose_times(answer):
+    times = []
+    if "once a day" in answer or "once daily" in answer:
+        times = ["08:00"]
+    elif "twice" in answer:
+        times = ["08:00", "20:00"]
+    elif "three times" in answer:
+        times = ["08:00", "14:00", "20:00"]
+    elif "every 8 hours" in answer:
+        times = ["06:00", "14:00", "22:00"]
+    elif "every 12 hours" in answer:
+        times = ["08:00", "20:00"]
+    else:
+        times = ["08:00"]  # fallback
+    return [datetime.strptime(t, "%H:%M").time() for t in times]
+
+# delay to speed up
 max_wait = 15  # seconds
 elapsed = 0
 
@@ -441,6 +471,60 @@ if send_clicked:
                     st.success(translated + medsafe_footer)
                 else:
                     st.success(cleaned + medsafe_footer)
+
+            # --- Extract data for reminder ---
+med_name = extract_medicine_name(user_question)
+duration_days = extract_duration_days(cleaned)
+dose_times = extract_dose_times(cleaned)
+
+# UI for reminder builder
+st.markdown("### ⏰ Set a Calendar Reminder")
+
+med_name_input = st.text_input("Medicine Name", value=med_name)
+start_date = st.date_input("Start Date", value=datetime.today())
+duration_days_input = st.number_input("Duration (days)", min_value=1, max_value=30, value=duration_days)
+
+cols = st.columns(len(dose_times))
+dose_inputs = []
+for i, col in enumerate(cols):
+    with col:
+        dose_inputs.append(st.time_input(f"Dose {i+1} Time", value=dose_times[i]))
+
+desc_text = {
+    "English": f"Take your {med_name_input}",
+    "Te Reo Māori": f"Tangohia tō {med_name_input}",
+    "Samoan": f"Inu lau {med_name_input}",
+    "Mandarin": f"服用 {med_name_input}"
+}.get(language, f"Take your {med_name_input}")
+
+def create_event(start_dt, minutes, repeat_count, title, description):
+    start_str = start_dt.strftime("%Y%m%dT%H%M%S")
+    end_str = (start_dt + timedelta(minutes=minutes)).strftime("%Y%m%dT%H%M%S")
+    return f"""BEGIN:VEVENT
+SUMMARY:{title}
+DTSTART;TZID=Pacific/Auckland:{start_str}
+DTEND;TZID=Pacific/Auckland:{end_str}
+RRULE:FREQ=DAILY;COUNT={repeat_count}
+DESCRIPTION:{description}
+END:VEVENT
+"""
+
+def build_ics():
+    calendar = "BEGIN:VCALENDAR\nVERSION:2.0\n"
+    for t in dose_inputs:
+        dt_start = datetime.combine(start_date, t)
+        calendar += create_event(dt_start, 10, duration_days_input, f"Take {med_name_input}", desc_text)
+    calendar += "END:VCALENDAR"
+    return calendar
+
+ics_data = build_ics()
+
+st.download_button(
+    label="📅 Download Pill Reminder (.ics)",
+    data=ics_data,
+    file_name=f"{med_name_input.replace(' ', '_')}_reminder.ics",
+    mime="text/calendar"
+)
 
             except Exception as e:
                 st.error(f"{L['error']} \n\nDetails: {str(e)}")
