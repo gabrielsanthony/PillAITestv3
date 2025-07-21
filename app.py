@@ -481,27 +481,30 @@ if send_clicked:
 # UI for reminder builder
 st.markdown("### ⏰ Set a Calendar Reminder")
 
-med_name_input = st.text_input("Medicine Name", value=med_name)
-start_date = st.date_input("Start Date", value=datetime.today())
-duration_days_input = st.number_input("Duration (days)", min_value=1, max_value=30, value=duration_days)
+if send_clicked and "med_name" in locals():
+    st.markdown("### ⏰ Set a Calendar Reminder")
 
-cols = st.columns(len(dose_times))
-dose_inputs = []
-for i, col in enumerate(cols):
-    with col:
-        dose_inputs.append(st.time_input(f"Dose {i+1} Time", value=dose_times[i]))
+    med_name_input = st.text_input("Medicine Name", value=med_name)
+    start_date = st.date_input("Start Date", value=datetime.today())
+    duration_days_input = st.number_input("Duration (days)", min_value=1, max_value=30, value=duration_days)
 
-desc_text = {
-    "English": f"Take your {med_name_input}",
-    "Te Reo Māori": f"Tangohia tō {med_name_input}",
-    "Samoan": f"Inu lau {med_name_input}",
-    "Mandarin": f"服用 {med_name_input}"
-}.get(language, f"Take your {med_name_input}")
+    cols = st.columns(len(dose_times))
+    dose_inputs = []
+    for i, col in enumerate(cols):
+        with col:
+            dose_inputs.append(st.time_input(f"Dose {i+1} Time", value=dose_times[i]))
 
-def create_event(start_dt, minutes, repeat_count, title, description):
-    start_str = start_dt.strftime("%Y%m%dT%H%M%S")
-    end_str = (start_dt + timedelta(minutes=minutes)).strftime("%Y%m%dT%H%M%S")
-    return f"""BEGIN:VEVENT
+    desc_text = {
+        "English": f"Take your {med_name_input}",
+        "Te Reo Māori": f"Tangohia tō {med_name_input}",
+        "Samoan": f"Inu lau {med_name_input}",
+        "Mandarin": f"服用 {med_name_input}"
+    }.get(language, f"Take your {med_name_input}")
+
+    def create_event(start_dt, minutes, repeat_count, title, description):
+        start_str = start_dt.strftime("%Y%m%dT%H%M%S")
+        end_str = (start_dt + timedelta(minutes=minutes)).strftime("%Y%m%dT%H%M%S")
+        return f"""BEGIN:VEVENT
 SUMMARY:{title}
 DTSTART;TZID=Pacific/Auckland:{start_str}
 DTEND;TZID=Pacific/Auckland:{end_str}
@@ -510,22 +513,22 @@ DESCRIPTION:{description}
 END:VEVENT
 """
 
-def build_ics():
-    calendar = "BEGIN:VCALENDAR\nVERSION:2.0\n"
-    for t in dose_inputs:
-        dt_start = datetime.combine(start_date, t)
-        calendar += create_event(dt_start, 10, duration_days_input, f"Take {med_name_input}", desc_text)
-    calendar += "END:VCALENDAR"
-    return calendar
+    def build_ics():
+        calendar = "BEGIN:VCALENDAR\nVERSION:2.0\n"
+        for t in dose_inputs:
+            dt_start = datetime.combine(start_date, t)
+            calendar += create_event(dt_start, 10, duration_days_input, f"Take {med_name_input}", desc_text)
+        calendar += "END:VCALENDAR"
+        return calendar
 
-ics_data = build_ics()
+    ics_data = build_ics()
 
-st.download_button(
-    label="📅 Download Pill Reminder (.ics)",
-    data=ics_data,
-    file_name=f"{med_name_input.replace(' ', '_')}_reminder.ics",
-    mime="text/calendar"
-)
+    st.download_button(
+        label="📅 Download Pill Reminder (.ics)",
+        data=ics_data,
+        file_name=f"{med_name_input.replace(' ', '_')}_reminder.ics",
+        mime="text/calendar"
+    )
 
           
 
