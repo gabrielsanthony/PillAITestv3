@@ -472,6 +472,9 @@ if send_clicked:
                 else:
                     st.success(cleaned + medsafe_footer)
 
+                except Exception as e:
+                    st.error(f"{L['error']} \n\nDetails: {str(e)}")
+
             # --- Extract data for reminder ---
 med_name = extract_medicine_name(user_question)
 duration_days = extract_duration_days(cleaned)
@@ -526,8 +529,7 @@ st.download_button(
     mime="text/calendar"
 )
 
-            except Exception as e:
-                st.error(f"{L['error']} \n\nDetails: {str(e)}")
+          
 
 st.markdown("</div>", unsafe_allow_html=True)
 
