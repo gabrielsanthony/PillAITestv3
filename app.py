@@ -475,13 +475,8 @@ if send_clicked:
                 med_name = extract_medicine_name(user_question)
                 duration_days = extract_duration_days(cleaned)
                 dose_times = extract_dose_times(cleaned)
-                except Exception as e:
-                    st.error(f"{L['error']} \n\nDetails: {str(e)}")
-
-            # --- Extract data for reminder ---
-med_name = extract_medicine_name(user_question)
-duration_days = extract_duration_days(cleaned)
-dose_times = extract_dose_times(cleaned)
+            except Exception as e:
+                st.error(f"{L['error']} \n\nDetails: {str(e)}")
 
 # UI for reminder builder
 st.markdown("### ⏰ Set a Calendar Reminder")
