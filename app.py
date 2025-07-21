@@ -471,9 +471,9 @@ if send_clicked:
                     st.success(translated + medsafe_footer)
                 else:
                     st.success(cleaned + medsafe_footer)
-
-                except Exception as e:
-                    st.error(f"{L['error']} \n\nDetails: {str(e)}")
+                
+            except Exception as e:
+                st.error(f"{L['error']} \n\nDetails: {str(e)}")
 
             # --- Extract data for reminder ---
 med_name = extract_medicine_name(user_question)
