@@ -475,14 +475,24 @@ if send_clicked:
                 med_name = extract_medicine_name(user_question)
                 duration_days = extract_duration_days(cleaned)
                 dose_times = extract_dose_times(cleaned)
+                st.session_state["last_med_name"] = med_name
+                st.session_state["last_duration_days"] = duration_days
+                st.session_state["last_dose_times"] = dose_times
             except Exception as e:
                 st.error(f"{L['error']} \n\nDetails: {str(e)}")
 
 # UI for reminder builder
 st.markdown("### ⏰ Set a Calendar Reminder")
 
-if send_clicked and "med_name" in locals():
-    st.markdown("### ⏰ Set a Calendar Reminder")
+# Show the reminder builder ALWAYS — prefill if available
+if "last_med_name" in st.session_state:
+    med_name = st.session_state["last_med_name"]
+    duration_days = st.session_state["last_duration_days"]
+    dose_times = st.session_state["last_dose_times"]
+else:
+    med_name = "Medication"
+    duration_days = 7
+    dose_times = [datetime.strptime("08:00", "%H:%M").time()]
 
     med_name_input = st.text_input("Medicine Name", value=med_name)
     start_date = st.date_input("Start Date", value=datetime.today())
