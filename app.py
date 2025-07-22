@@ -1,5 +1,3 @@
-Start of add reminder : 
-
 import streamlit as st
 import openai
 import os
