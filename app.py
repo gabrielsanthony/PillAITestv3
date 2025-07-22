@@ -491,7 +491,7 @@ if send_clicked:
 # UI for reminder builder
 with col_center[1]:  # Use the same centered column as your toggles
     st.session_state["show_reminder_form"] = st.checkbox("⏰ Set a Calendar Reminder", value=st.session_state["show_reminder_form"])
-        if st.session_state["show_reminder_form"]: 
+    if st.session_state["show_reminder_form"]: 
             # Show the reminder builder ALWAYS — prefill if available
             if "last_med_name" in st.session_state:
                 med_name = st.session_state["last_med_name"]
