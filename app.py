@@ -1,4 +1,157 @@
-tion:",
+Start of add reminder : 
+
+import streamlit as st
+import openai
+import os
+import re
+import base64
+import json
+import time  # at the top of your file
+from deep_translator import GoogleTranslator
+from datetime import datetime, timedelta
+
+import re
+
+# code for extracing medicines name duration and timing from the answer
+def extract_medicine_name(question):
+    # Looks for common medicine inquiry phrases
+    match = re.search(r"(?:take|use|about|for)\s+([A-Za-z0-9\-]+)", question, re.IGNORECASE)
+    return match.group(1) if match else "Medication"
+
+def extract_duration_days(answer):
+    match = re.search(r"for (\d+) days?", answer)
+    return int(match.group(1)) if match else 7
+
+def extract_dose_times(answer):
+    times = []
+    if "once a day" in answer or "once daily" in answer:
+        times = ["08:00"]
+    elif "twice" in answer:
+        times = ["08:00", "20:00"]
+    elif "three times" in answer:
+        times = ["08:00", "14:00", "20:00"]
+    elif "every 8 hours" in answer:
+        times = ["06:00", "14:00", "22:00"]
+    elif "every 12 hours" in answer:
+        times = ["08:00", "20:00"]
+    else:
+        times = ["08:00"]  # fallback
+    return [datetime.strptime(t, "%H:%M").time() for t in times]
+
+# delay to speed up
+max_wait = 15  # seconds
+elapsed = 0
+
+# Page config
+st.set_page_config(page_title="Pill-AI 3.0", page_icon="💊", layout="wide")
+
+# Custom CSS
+st.markdown("""
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari&family=Noto+Sans+SC&display=swap" rel="stylesheet">
+    <style>
+    body {
+        background: linear-gradient(to bottom right, #f4f6f9, #e0f7fa);
+        font-family: 'Segoe UI', sans-serif;
+    }
+    html[lang='zh'] body { font-family: 'Noto Sans SC', sans-serif !important; }
+    .stTextInput input {
+        background-color: #eeeeee !important;
+        color: #000000 !important;
+        font-size: 1.2em !important;
+        padding: 10px !important;
+        border: 2px solid black !important;
+        border-radius: 6px !important;
+        box-shadow: none !important;
+    }
+    div:empty { display: none !important; }
+    .stTextInput input:focus { border: 2px solid orange !important; outline: none !important; }
+    .stButton button {
+        background-color: #3b82f6;
+        color: white;
+        font-size: 1.1em;
+        padding: 0.6em 1em;
+        border-radius: 8px;
+        margin-top: 4px;
+        width: 100%;
+    }
+    .stButton button:hover {
+        background-color: #3b82f6;
+        color: white;
+        font-size: 1.5em;
+    }
+      .stButton button:focus {
+    background-color: #2563eb !important;
+    color: white !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+    .stButton button:active {
+    background-color: #2563eb !important;
+    color: white !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+    .block-container { padding-top: 2rem; padding-bottom: 2rem; }
+    .section {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-6px); }
+        100% { transform: translateY(0px); }
+    }
+    img[src*="pillai_logo"] {
+        animation: float 3s ease-in-out infinite;
+    }
+    .stSelectbox div[data-baseweb="select"] {
+        margin-top: 6px;
+        font-size: 1.05em;
+        padding: 6px;
+    }
+    .stSelectbox div[data-baseweb="select"] > div {
+        border: 1px solid #ccc !important;
+        border-radius: 6px !important;
+    }
+    .stSelectbox div[data-baseweb="select"]:hover {
+        border-color: #999 !important;
+    }
+    /* Reduce margin below the language dropdown */
+    div[data-testid="stSelectbox"] {
+    margin-bottom: 0.3rem !important;
+    }
+    @media (max-width: 768px) {
+    .stTextInput input {
+        font-size: 1em !important;
+    }
+    .stButton button {
+        font-size: 1em !important;
+        color: white;
+        padding: 0.6em !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# Logo
+def get_base64_image(path):
+    with open(path, "rb") as img_file:
+        return f"data:image/png;base64,{base64.b64encode(img_file.read()).decode()}"
+
+if os.path.exists("pillai_logo.png"):
+    logo_base64 = get_base64_image("pillai_logo.png")
+    st.markdown(f"<div style='text-align: center;'><img src='{logo_base64}' width='240' style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+
+# Language selector
+language = st.selectbox("\U0001f310 Choose answer language:", ["English", "Te Reo Māori", "Samoan", "Mandarin"])
+
+labels = {
+    "English": {
+        #"prompt": "Ask a medicine question:",
         "placeholder": "💡 Ask a medication related question",
         "send": "Send",
         "thinking": "Thinking...",
@@ -597,3 +750,4 @@ faq_title = {
 
 with st.expander(faq_title):
     st.markdown(faq_sections.get(language, faq_sections["English"]))
+
