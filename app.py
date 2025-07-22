@@ -1,4 +1,8 @@
 import streamlit as st
+# Initialise reminder toggle
+if "show_reminder_form" not in st.session_state:
+    st.session_state["show_reminder_form"] = False
+    
 import openai
 import os
 import re
@@ -9,10 +13,6 @@ from deep_translator import GoogleTranslator
 from datetime import datetime, timedelta
 
 import re
-
-# Initialise reminder toggle
-if "show_reminder_form" not in st.session_state:
-    st.session_state["show_reminder_form"] = False
 
 # code for extracing medicines name duration and timing from the answer
 def extract_medicine_name(question):
