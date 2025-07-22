@@ -479,9 +479,11 @@ if send_clicked:
                 med_name = extract_medicine_name(user_question)
                 duration_days = extract_duration_days(cleaned)
                 dose_times = extract_dose_times(cleaned)
-                # Show "Add Reminder" button after successful response
-                if st.button("➕ Add Reminder"):
-                    st.session_state["show_reminder_form"] = True
+              # Show "Add Reminder" button only after successful response
+                if not st.session_state["show_reminder_form"]:
+                    if st.button("➕ Add Reminder"):
+                        st.session_state["show_reminder_form"] = True
+                        st.experimental_rerun()
             except Exception as e:
                 st.error(f"{L['error']} \n\nDetails: {str(e)}")
 
