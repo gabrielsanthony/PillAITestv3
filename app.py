@@ -43,6 +43,10 @@ elapsed = 0
 # Page config
 st.set_page_config(page_title="Pill-AI 3.0", page_icon="💊", layout="wide")
 
+# initialise reminder form
+if "show_reminder_form" not in st.session_state:
+    st.session_state["show_reminder_form"] = False
+
 # Custom CSS
 st.markdown("""
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari&family=Noto+Sans+SC&display=swap" rel="stylesheet">
@@ -486,8 +490,8 @@ if send_clicked:
 
 # UI for reminder builder
 with col_center[1]:  # Use the same centered column as your toggles
-    if st.button("⏰ Set a Calendar Reminder", key="reminder_button", use_container_width=True):
-        st.session_state["show_reminder_form"] = True
+    if st.button("⏰ Set a Calendar Reminder", use_container_width=True):
+        st.session_state["show_reminder_form"] = not st.session_state["show_reminder_form"]
         if st.session_state["show_reminder_form"]: 
             # Show the reminder builder ALWAYS — prefill if available
             if "last_med_name" in st.session_state:
