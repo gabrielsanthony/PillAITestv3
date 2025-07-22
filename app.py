@@ -14,6 +14,9 @@ from datetime import datetime, timedelta
 
 import re
 
+if "show_reminder_form" not in st.session_state:
+    st.session_state["show_reminder_form"] = False
+
 # code for extracing medicines name duration and timing from the answer
 def extract_medicine_name(question):
     # Looks for common medicine inquiry phrases
@@ -479,7 +482,7 @@ if send_clicked:
                 med_name = extract_medicine_name(user_question)
                 duration_days = extract_duration_days(cleaned)
                 dose_times = extract_dose_times(cleaned)
-              # Show "Add Reminder" button only after successful response
+             # Show "Add Reminder" button only after successful response
                 if not st.session_state["show_reminder_form"]:
                     if st.button("➕ Add Reminder"):
                         st.session_state["show_reminder_form"] = True
@@ -491,7 +494,7 @@ if send_clicked:
 st.markdown("### ⏰ Set a Calendar Reminder")
 
 # Show the reminder form only if toggled on
-if st.session_state.get("show_reminder_form", False):
+if st.session_state["show_reminder_form"]:
     st.markdown("### ⏰ Set a Calendar Reminder")
 
     med_name_input = st.text_input("Medicine Name", value=med_name)
