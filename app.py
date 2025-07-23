@@ -478,6 +478,17 @@ if send_clicked:
                     st.success(translated + medsafe_footer)
                 else:
                     st.success(cleaned + medsafe_footer)
+
+                # 💡 Checkbox placed after answer is shown
+                st.session_state["show_reminder_form"] = st.checkbox("📅 Set a Calendar Reminder", value=st.session_state["show_reminder_form"])
+
+                # ✅ This block should follow the checkbox
+                if st.session_state["show_reminder_form"]:
+                    # form inputs like med_name_input, date, time, etc.
+                    med_name_input = st.text_input("Medicine Name", value=med_name)
+                    start_date = st.date_input("Start Date", value=datetime.today())
+                    duration_days_input = st.number_input("Duration (days)", min_value=1, max_value=30, value=duration_days)
+                    
                   # --- Extract data for reminder ---
                 med_name = extract_medicine_name(user_question)
                 duration_days = extract_duration_days(cleaned)
@@ -490,7 +501,6 @@ if send_clicked:
 
 # UI for reminder builder
 with col_center[1]:  # Use the same centered column as your toggles
-    st.session_state["show_reminder_form"] = st.checkbox("⏰ Set a Calendar Reminder", value=st.session_state["show_reminder_form"])
     if st.session_state["show_reminder_form"]: 
             # Show the reminder builder ALWAYS — prefill if available
             if "last_med_name" in st.session_state:
