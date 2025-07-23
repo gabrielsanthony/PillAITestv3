@@ -423,10 +423,6 @@ st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
 if send_clicked:
     st.session_state["question_submitted"] = user_question
 
-if "show_reminder_form" not in st.session_state:
-    st.session_state["show_reminder_form"] = False
-
-
 if send_clicked:
     if not user_question.strip():
         st.warning(L["empty"])
