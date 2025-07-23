@@ -482,6 +482,7 @@ if send_clicked:
                     # form inputs like med_name_input, date, time, etc.
                     med_name_input = st.text_input("Medicine Name", value=med_name)
                     start_date = st.date_input("Start Date", value=datetime.today())
+                    st.markdown(f"<span style='color: grey;'>Selected: {start_date.strftime('%d/%m/%Y')}</span>", unsafe_allow_html=True)                    
                     duration_days_input = st.number_input("Duration (days)", min_value=1, max_value=30, value=duration_days)
                     
                   # --- Extract data for reminder ---
