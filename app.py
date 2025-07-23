@@ -477,9 +477,6 @@ if send_clicked:
                     st.session_state["cleaned_answer"] = cleaned
                     st.session_state["question_submitted"] = user_question
 
-                # 💡 Checkbox placed after answer is shown
-                st.session_state["show_reminder_form"] = st.checkbox("📅 Set a Calendar Reminder", value=st.session_state["show_reminder_form"], key="calendar_toggle")
-
                 # ✅ This block should follow the checkbox
                 if st.session_state["show_reminder_form"]:
                     # form inputs like med_name_input, date, time, etc.
