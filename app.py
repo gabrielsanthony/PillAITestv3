@@ -477,21 +477,6 @@ if send_clicked:
                     st.session_state["cleaned_answer"] = cleaned
                     st.session_state["question_submitted"] = user_question
 
-                # ✅ This block should follow the checkbox
-                if st.session_state["show_reminder_form"]:
-                    # form inputs like med_name_input, date, time, etc.
-                    med_name_input = st.text_input("Medicine Name", value=med_name)
-                    start_date = st.date_input("Start Date", value=datetime.today())
-                    st.markdown(f"<span style='color: grey;'>Selected: {start_date.strftime('%d/%m/%Y')}</span>", unsafe_allow_html=True)                    
-                    duration_days_input = st.number_input("Duration (days)", min_value=1, max_value=30, value=duration_days)
-                    
-                  # --- Extract data for reminder ---
-                med_name = extract_medicine_name(user_question)
-                duration_days = extract_duration_days(cleaned)
-                dose_times = extract_dose_times(cleaned)
-                st.session_state["last_med_name"] = med_name
-                st.session_state["last_duration_days"] = duration_days
-                st.session_state["last_dose_times"] = dose_times
             except Exception as e:
                 st.error(f"{L['error']} \n\nDetails: {str(e)}")
 
