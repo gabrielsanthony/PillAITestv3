@@ -444,6 +444,11 @@ if send_clicked:
                         thread_id=st.session_state["thread_id"],
                         assistant_id=ASSISTANT_ID
                     )
+                    
+                    # Add a timeout loop
+                    start_time = time.time()
+                    timeout_seconds = 15
+                    
                     while True:
                         run_status = client.beta.threads.runs.retrieve(
                             thread_id=st.session_state["thread_id"],
@@ -451,6 +456,9 @@ if send_clicked:
                         )
                         if run_status.status in ["completed", "failed"]:
                             break
+                        if time.time() - start_time > timeout_seconds:
+                            raise TimeoutError("⚠️ OpenAI assistant response timed out. Please try again.")
+                        time.sleep(0.5)  # pause briefly to avoid overloading API
                     if run_status.status == "completed":
                         messages = client.beta.threads.messages.list(
                             thread_id=st.session_state["thread_id"], limit=1
