@@ -10,10 +10,6 @@ from datetime import datetime, timedelta
 
 import re
 
-@st.cache_resource
-def get_translator(target_lang="en"):
-    return GoogleTranslator(source="auto", target=target_lang)
-
 # code for extracing medicines name duration and timing from the answer
 def extract_medicine_name(question):
     # Looks for common medicine inquiry phrases
@@ -482,8 +478,7 @@ if send_clicked:
                 # Clean and translate if needed
                 cleaned = re.sub(r'【[^】]*】', '', raw_answer).strip()
                 if language != "English" and language in lang_codes:
-                    translator = get_translator(target_lang=lang_codes[language])
-                    translated = translator.translate(cleaned)                    
+                    translated = GoogleTranslator(source='auto', target=lang_codes[language]).translate(cleaned)
                     st.success(translated + medsafe_footer)
                 else:
                     st.success(cleaned + medsafe_footer)
@@ -824,7 +819,4 @@ faq_title = {
     "Samoan": "❓ Fesili masani – Kiliki e faitau",
     "Mandarin": "❓ 常见问题 – 点击展开"
 }.get(language, "❓ FAQ – Click to expand")
-
-with st.expander(faq_title):
-    st.markdown(faq_sections.get(language, faq_sections["English"]))
 
